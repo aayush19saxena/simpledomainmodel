@@ -91,15 +91,30 @@ open class Job {
   public enum JobType {
     case Hourly(Double)
     case Salary(Int)
+    
   }
   
   public init(title : String, type : JobType) {
+    self.title = title
+    self.type = type
   }
   
   open func calculateIncome(_ hours: Int) -> Int {
+    switch self.type {
+    case .Hourly(let hourly):
+        return Int(hourly * Double(hours))
+    case .Salary(let salary):
+        return salary
+    }
   }
   
   open func raise(_ amt : Double) {
+    switch self.type {
+    case .Hourly(let hourly):
+        self.type = JobType.Hourly(hourly + amt)
+    case .Salary(let salary):
+        self.type = JobType.Salary(salary + Int(amt))
+    }
   }
 }
 
@@ -113,15 +128,17 @@ open class Person {
 
   fileprivate var _job : Job? = nil
   open var job : Job? {
-    get { }
+    get { return self._job}
     set(value) {
+        self._job = self.age > 18 ? value : nil
     }
   }
   
   fileprivate var _spouse : Person? = nil
   open var spouse : Person? {
-    get { }
+    get { return self._spouse }
     set(value) {
+        self._spouse = self.age >= 18 ? value : nil
     }
   }
   
@@ -132,6 +149,7 @@ open class Person {
   }
   
   open func toString() -> String {
+    return "[Person: firstname:\(self.firstName) lastname:\(self.lastName) age:\(self.age) job:\(self.job) spouse:\(self.spouse)]"
   }
 }
 
@@ -142,12 +160,36 @@ open class Family {
   fileprivate var members : [Person] = []
   
   public init(spouse1: Person, spouse2: Person) {
+    if(spouse1.spouse == nil && spouse2.spouse == nil) {
+        self.members.append(spouse1)
+        self.members.append(spouse2)
+        spouse1.spouse = spouse2
+        spouse2.spouse = spouse1
+    }
   }
   
   open func haveChild(_ child: Person) -> Bool {
+    var canHaveChild = false
+    self.members.forEach { (person) in
+        if person.age < 21 && person._spouse != nil {
+            canHaveChild = false
+        }
+    }
+    if (canHaveChild) {
+        self.members.append(child)
+    }
+    
+    return canHaveChild
   }
   
   open func householdIncome() -> Int {
+    var total = 0
+    self.members.forEach { (member) in
+        if (member.job != nil) {
+            total += (member.job?.calculateIncome(2000))!
+        }
+    }
+    return total
   }
 }
 
