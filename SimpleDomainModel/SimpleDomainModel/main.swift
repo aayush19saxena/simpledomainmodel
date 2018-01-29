@@ -130,7 +130,7 @@ open class Person {
   open var job : Job? {
     get { return self._job}
     set(value) {
-        self._job = self.age > 18 ? value : nil
+        self._job = self.age > 15 ? value : nil
     }
   }
   
@@ -138,7 +138,7 @@ open class Person {
   open var spouse : Person? {
     get { return self._spouse }
     set(value) {
-        self._spouse = self.age >= 18 ? value : nil
+        self._spouse = self.age >= 18 ? value: nil
     }
   }
   
@@ -149,7 +149,7 @@ open class Person {
   }
   
   open func toString() -> String {
-    return "[Person: firstname:\(self.firstName) lastname:\(self.lastName) age:\(self.age) job:\(self.job) spouse:\(self.spouse)]"
+    return "[Person: firstName:\(self.firstName) lastName:\(self.lastName) age:\(self.age) job:\(self.job as Job?) spouse:\(self.spouse as Person?)]"
   }
 }
 
@@ -169,17 +169,13 @@ open class Family {
   }
   
   open func haveChild(_ child: Person) -> Bool {
-    var canHaveChild = false
-    self.members.forEach { (person) in
-        if person.age < 21 && person._spouse != nil {
-            canHaveChild = false
+    for member in self.members{
+        if member.age > 21 && member._spouse != nil{
+            self.members.append(child)
+            return true
         }
     }
-    if (canHaveChild) {
-        self.members.append(child)
-    }
-    
-    return canHaveChild
+    return false
   }
   
   open func householdIncome() -> Int {
